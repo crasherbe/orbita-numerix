@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numerix Pattern Lab</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:system-ui;
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:#f1f5f9;
+}
+
+header{
+padding:18px;
+text-align:center;
+background:#0b1220;
+font-size:20px;
+font-weight:bold;
+color:#38bdf8;
+letter-spacing:1px;
+}
+
+.container{
+padding:15px;
+max-width:500px;
+margin:auto;
+}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:14px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.4);
+}
+
+h3{
+margin-top:0;
+color:#38bdf8;
+}
+
+input,select{
+width:100%;
+padding:11px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border:none;
+border-radius:8px;
+font-size:16px;
+font-weight:bold;
+background:#38bdf8;
+color:#000;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.85;
+}
+
+.big{
+font-size:30px;
+font-weight:bold;
+text-align:center;
+color:#22c55e;
+letter-spacing:3px;
+}
+
+.recommended{
+font-size:28px;
+font-weight:bold;
+text-align:center;
+color:#facc15;
+letter-spacing:3px;
+}
+
+.small{
+font-size:13px;
+color:#94a3b8;
+}
+
+#history{
+max-height:150px;
+overflow:auto;
+font-size:14px;
+}
+
+footer{
+text-align:center;
+font-size:12px;
+padding:15px;
+color:#64748b;
+}
+details{
+background:#0b1220;
+padding:10px;
+border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>NUMERIX PATTERN LAB</header>
+
+<div class="container">
+
+<details open>
+<summary><b>📘 Cara Menggunakan</b></summary>
+<p class="small">
+1. Pilih mode digit (2D – 5D).<br>
+2. Masukkan hasil angka yang sudah keluar.<br>
+3. Pilih strategi prediksi.<br>
+4. Klik Generate Prediction.<br>
+5. Lihat Recommended untuk kombinasi paling kuat berdasarkan statistik posisi digit.
+</p>
+</details>
+
+<div class="card">
+<h3>Pilih Mode Digit</h3>
+<select id="mode">
+<option value="2">2 Digit (2D)</option>
+<option value="3">3 Digit (3D)</option>
+<option value="4" selected>4 Digit (4D)</option>
+<option value="5">5 Digit (5D)</option>
+</select>
+</div>
+
+<div class="card">
+<h3>Input Data Hasil</h3>
+<input type="text" id="inputAngka" placeholder="Masukkan angka sesuai mode">
+<button onclick="tambahData()">Tambah Data</button>
+<button onclick="generate()">Generate Prediction</button>
+<button onclick="resetData()">Reset Semua Data</button>
+</div>
+
+<div class="card">
+<h3>Pilih Strategi</h3>
+<label><input type="radio" name="strategi" value="random" checked> Random Murni</label><br>
+<label><input type="radio" name="strategi" value="weighted"> Statistik Weighted</label><br>
+<label><input type="radio" name="strategi" value="hot"> Hot Bias (Digit Terpanas)</label>
+</div>
+
+<div class="card">
+<h3>🎯 Hasil Prediksi</h3>
+<div id="prediction" class="big">----</div>
+</div>
+
+<div class="card">
+<h3>🥇 Recommended Terkuat</h3>
+<div id="recommended" class="recommended">----</div>
+</div>
+
+<div class="card">
+<h3>📊 Kekuatan Data</h3>
+<div id="dataStrength" class="small">Belum ada data</div>
+</div>
+
+<div class="card">
+<h3>Statistik Posisi Digit</h3>
+<div id="stats" class="small"></div>
+</div>
+
+<div class="card">
+<h3>Riwayat Data</h3>
+<div id="history"></div>
+</div>
+
+</div>
+
+<footer>Numerix Pattern Lab – Statistical Combination Simulator</footer>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("numerix")) || [];
+
+function save(){
+localStorage.setItem("numerix",JSON.stringify(data));
+}
+
+function tambahData(){
+let mode=parseInt(document.getElementById("mode").value);
+let val=document.getElementById("inputAngka").value;
+
+if(val.length!==mode || isNaN(val)){
+alert("Digit harus sesuai mode dan hanya angka.");
+return;
+}
+
+data.push(val);
+document.getElementById("inputAngka").value="";
+save();
+render();
+}
+
+function resetData(){
+if(confirm("Hapus semua data?")){
+data=[];
+save();
+render();
+}
+}
+
+function render(){
+
+document.getElementById("history").innerHTML=data.join("<br>");
+
+if(data.length===0){
+document.getElementById("recommended").innerText="----";
+document.getElementById("dataStrength").innerText="Belum ada data";
+document.getElementById("stats").innerText="";
+return;
+}
+
+let mode=parseInt(document.getElementById("mode").value);
+
+let posisi=[];
+for(let i=0;i<mode;i++){
+posisi.push(Array(10).fill(0));
+}
+
+data.forEach(n=>{
+for(let i=0;i<mode;i++){
+posisi[i][parseInt(n[i])]++;
+}
+});
+
+let rekom="";
+let statsHTML="";
+
+for(let i=0;i<mode;i++){
+let maxIndex=posisi[i].indexOf(Math.max(...posisi[i]));
+rekom+=maxIndex;
+
+statsHTML+="Posisi "+(i+1)+": ";
+for(let d=0;d<10;d++){
+statsHTML+=d+"("+posisi[i][d]+") ";
+}
+statsHTML+="<br><br>";
+}
+
+document.getElementById("recommended").innerText=rekom;
+document.getElementById("stats").innerHTML=statsHTML;
+
+let strength="";
+if(data.length<20) strength="Data Lemah";
+else if(data.length<50) strength="Data Cukup";
+else strength="Data Kuat";
+
+document.getElementById("dataStrength").innerText=
+strength+" ("+data.length+" data tersimpan)";
+}
+
+function weightedRandom(arr){
+let total=arr.reduce((a,b)=>a+b);
+let r=Math.random()*total;
+let sum=0;
+for(let i=0;i<arr.length;i++){
+sum+=arr[i];
+if(r<=sum) return i;
+}
+}
+
+function generate(){
+
+if(data.length===0){
+alert("Masukkan data dulu.");
+return;
+}
+
+let mode=parseInt(document.getElementById("mode").value);
+let strategi=document.querySelector('input[name="strategi"]:checked').value;
+
+let posisi=[];
+for(let i=0;i<mode;i++){
+posisi.push(Array(10).fill(1));
+}
+
+data.forEach(n=>{
+for(let i=0;i<mode;i++){
+posisi[i][parseInt(n[i])]++;
+}
+});
+
+let hasil="";
+
+for(let i=0;i<mode;i++){
+
+if(strategi==="random"){
+hasil+=Math.floor(Math.random()*10);
+}
+else if(strategi==="weighted"){
+hasil+=weightedRandom(posisi[i]);
+}
+else if(strategi==="hot"){
+hasil+=posisi[i].indexOf(Math.max(...posisi[i]));
+}
+}
+
+document.getElementById("prediction").innerText=hasil;
+}
+
+render();
+
+</script>
+
+</body>
+</html>
