@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orbita Numerix</title>
+<title>Orbita Numerix Pro</title>
 
 <style>
 *{box-sizing:border-box}
@@ -13,7 +13,6 @@ font-family:system-ui;
 background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
 }
-
 header{
 text-align:center;
 padding:20px;
@@ -21,15 +20,8 @@ font-size:22px;
 font-weight:bold;
 background:#0b1220;
 color:#38bdf8;
-letter-spacing:2px;
 }
-
-.container{
-max-width:500px;
-margin:auto;
-padding:15px;
-}
-
+.container{max-width:500px;margin:auto;padding:15px;}
 .card{
 background:#1e293b;
 padding:15px;
@@ -37,21 +29,15 @@ border-radius:14px;
 margin-bottom:15px;
 box-shadow:0 5px 15px rgba(0,0,0,0.4);
 }
-
-h3{
-margin-top:0;
-color:#38bdf8;
-}
-
+h3{margin-top:0;color:#38bdf8;}
 select,input{
 width:100%;
 padding:12px;
-margin-bottom:10px;
+margin-bottom:8px;
 border:none;
 border-radius:8px;
 font-size:16px;
 }
-
 button{
 width:100%;
 padding:13px;
@@ -63,9 +49,6 @@ background:#38bdf8;
 color:black;
 cursor:pointer;
 }
-
-button:hover{opacity:0.85}
-
 .result-box{
 background:#0b1220;
 padding:10px;
@@ -74,81 +57,66 @@ max-height:160px;
 overflow:auto;
 font-size:14px;
 }
-
-.recommended{
-font-size:18px;
-font-weight:bold;
-color:#facc15;
-}
-
-.strong{
-font-size:22px;
-font-weight:bold;
-color:#22c55e;
-text-align:center;
-letter-spacing:3px;
-}
-
-.small{
-font-size:13px;
-color:#94a3b8;
-}
-
-footer{
-text-align:center;
-font-size:12px;
-color:#64748b;
-padding:15px;
-}
-details{
-background:#0b1220;
-padding:10px;
-border-radius:8px;
-margin-bottom:15px;
-}
+.recommended{font-size:18px;font-weight:bold;color:#facc15;}
+.strong{font-size:22px;font-weight:bold;color:#22c55e;text-align:center;}
+.stats{font-size:13px;color:#94a3b8;}
+.loading{animation:blink 0.7s infinite;}
+@keyframes blink{50%{opacity:0.4}}
+footer{text-align:center;font-size:12px;color:#64748b;padding:15px;}
+details{background:#0b1220;padding:10px;border-radius:8px;margin-bottom:15px;}
 </style>
 </head>
 
 <body>
 
-<header>ORBITA NUMERIX</header>
+<header>ORBITA NUMERIX PRO</header>
 
 <div class="container">
 
 <details open>
-<summary><b>📘 Panduan Penggunaan</b></summary>
-<p class="small">
-1. Pilih jenis digit (2D–5D).<br>
-2. Masukkan 1–5 riwayat angka terakhir sesuai urutan keluarnya.<br>
-3. Klik Generate.<br>
-4. Sistem akan menghitung menggunakan pola statistik, frekuensi digit, dan kombinasi pseudo-random.<br>
-5. Lihat hasil utama, rekomendasi 1–10 angka, dan penguatan angka selanjutnya.
-</p>
+<summary><b>📘 Panduan</b></summary>
+<div class="stats">
+1. Pilih mode digit (2D–5D).<br>
+2. Masukkan riwayat terbaru di kolom paling atas.<br>
+3. Pilih jumlah generator.<br>
+4. Klik Generate.<br>
+Sistem otomatis memilih strategi terbaik berdasarkan distribusi data.
+</div>
 </details>
 
 <div class="card">
-<h3>Pilih Mode Digit</h3>
+<h3>Mode Digit</h3>
 <select id="mode">
 <option value="2">2D</option>
 <option value="3">3D</option>
 <option value="4" selected>4D</option>
 <option value="5">5D</option>
 </select>
+
+<select id="jumlah">
+<option value="20">20 Hasil</option>
+<option value="50">50 Hasil</option>
+<option value="100">100 Hasil</option>
+</select>
 </div>
 
 <div class="card">
-<h3>Input Riwayat (1–5 data)</h3>
-<input type="text" id="historyInput" placeholder="Contoh: 1234, 5678, 9012">
+<h3>Riwayat (Terbaru → Lama)</h3>
+<input id="h1" placeholder="Terbaru">
+<input id="h2" placeholder="Sebelumnya">
+<input id="h3" placeholder="Sebelumnya lagi">
+<input id="h4" placeholder="Lebih lama">
+<input id="h5" placeholder="Paling lama">
 <button onclick="generate()">Generate</button>
 </div>
 
 <div class="card">
-<h3>1️⃣ Hasil Generator Utama</h3>
+<h3>1️⃣ Hasil Generator</h3>
 <div id="mainResult" class="result-box"></div>
 </div>
 
 <div class="card">
-<h3>2️⃣ 1–10 Angka Recommended</h3>
+<h3>2️⃣ 1–10 Recommended (Dari Generator)</h3>
 <div id="recommended" class="recommended"></div>
 </div>
 
@@ -157,15 +125,16 @@ margin-bottom:15px;
 <div id="strongNext" class="strong"></div>
 </div>
 
+<div class="card">
+<h3>📊 Statistik Distribusi Digit</h3>
+<div id="stats" class="stats"></div>
 </div>
 
-<footer>Orbita Numerix – Smart Statistical Pattern Generator</footer>
+</div>
+
+<footer>Orbita Numerix Pro – Adaptive Statistical Engine</footer>
 
 <script>
-
-function randomDigit(){
-return Math.floor(Math.random()*10);
-}
 
 function weightedPick(arr){
 let total=arr.reduce((a,b)=>a+b);
@@ -180,63 +149,100 @@ if(r<=sum) return i;
 function generate(){
 
 let mode=parseInt(document.getElementById("mode").value);
-let input=document.getElementById("historyInput").value;
+let jumlah=parseInt(document.getElementById("jumlah").value);
 
-if(!input){
+let inputs=[
+h1.value,h2.value,h3.value,h4.value,h5.value
+];
+
+let histories=[];
+for(let val of inputs){
+if(val && !isNaN(val)){
+if(val.length>=mode){
+histories.push(val.slice(0,mode));
+}
+}
+}
+
+if(histories.length===0){
 alert("Masukkan minimal 1 riwayat.");
 return;
 }
 
-let histories=input.split(",").map(x=>x.trim());
+mainResult.innerHTML="<div class='loading'>Generating...</div>";
+recommended.innerHTML="";
+strongNext.innerHTML="";
+stats.innerHTML="";
 
-if(histories.length>5){
-alert("Maksimal 5 riwayat.");
-return;
-}
-
-for(let h of histories){
-if(h.length!==mode || isNaN(h)){
-alert("Format riwayat tidak sesuai mode.");
-return;
-}
-}
+setTimeout(()=>{
 
 let posisi=[];
 for(let i=0;i<mode;i++){
 posisi.push(Array(10).fill(1));
 }
 
+let weight=5;
 histories.forEach(num=>{
 for(let i=0;i<mode;i++){
-posisi[i][parseInt(num[i])]+=2;
+posisi[i][parseInt(num[i])] += weight;
 }
+weight--;
 });
 
-/* generator utama 20 kombinasi */
+/* Tentukan strategi terbaik otomatis */
+let totalSpread=0;
+for(let i=0;i<mode;i++){
+let max=Math.max(...posisi[i]);
+let min=Math.min(...posisi[i]);
+totalSpread+=max-min;
+}
+
+let strategy = totalSpread > 10 ? "weighted" : "random";
+
+/* Generator utama */
 let main=[];
-for(let x=0;x<20;x++){
+for(let x=0;x<jumlah;x++){
 let hasil="";
 for(let i=0;i<mode;i++){
+if(strategy==="weighted"){
 hasil+=weightedPick(posisi[i]);
+}else{
+hasil+=Math.floor(Math.random()*10);
+}
 }
 main.push(hasil);
 }
 
-document.getElementById("mainResult").innerHTML=main.join("<br>");
+mainResult.innerHTML=main.join("<br>");
 
-/* recommended 1-10 */
-let unique=[...new Set(main)];
-unique.sort(()=>Math.random()-0.5);
-let rec=unique.slice(0,10);
-document.getElementById("recommended").innerHTML=rec.join(" | ");
+/* Ranking berdasarkan frekuensi hasil */
+let freq={};
+main.forEach(n=>{freq[n]=(freq[n]||0)+1});
 
-/* penguatan angka selanjutnya */
-let strong="";
+let sorted=Object.keys(freq).sort((a,b)=>freq[b]-freq[a]);
+
+let rec=sorted.slice(0,10);
+recommended.innerHTML=rec.join(" | ");
+
+/* Top 1 sebagai penguatan */
+strongNext.innerHTML=sorted[0];
+
+/* Statistik visual */
+let statHTML="";
 for(let i=0;i<mode;i++){
-let maxIndex=posisi[i].indexOf(Math.max(...posisi[i]));
-strong+=maxIndex;
+statHTML+="Posisi "+(i+1)+": ";
+let total=posisi[i].reduce((a,b)=>a+b);
+for(let d=0;d<10;d++){
+let percent=((posisi[i][d]/total)*100).toFixed(1);
+statHTML+=d+"("+percent+"%) ";
 }
-document.getElementById("strongNext").innerHTML=strong;
+statHTML+="<br><br>";
+}
+
+stats.innerHTML=statHTML;
+
+},600);
+
 }
 
 </script>
